@@ -333,22 +333,207 @@ export default function FleetDashboard() {
             </div>
           </section>
 
-          
+          {/* 5. Filter Toolbar */}
+          <section className="bg-[#121827] border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+            {/* Search Bar */}
+            <div className="relative flex-1 min-w-[240px]">
+              {/* <Search className="absolution left-3 top-3 w-4 h-4 text-slate-500" /> */}
+              <input 
+                type="text" 
+                placeholder="Search van ID or driver..."
+                value={searchQuery}
+                onChange= {(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full bg-[#182032] border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              {/* Status filter group  [ Operational , Broke Down , .....]*/}
+              <div className="bg-[#182032] p-1 rounded-xl flex items-center gap-1 border border-slate-800">
+                {["All", "Operational", "Needs Service", "Broke Down"].map((status) =>(
+                  <button
+                  key ={status}
+                  onClick={() => {
+                    setSelectedStatus(status);
+                    setCurrentPage(1);
+                  }}
+
+                  className={`px-3 py-1.5 rounded-lg font-medium transition ${
+                      selectedStatus === status
+                        ? "bg-blue-600 text-white font-semibold"
+                        : "text-slate-400 hover:text-slate-200"
+                    }`}
+                  >
+                    {status}
+
+                  </button>
+                ))}
+              </div>
+
+
+            {/* Battery Filter Group */}
+            <div className="bg-[#182032] p-1 rounded-xl flex items-center gap-1 border border-slate-800">
+              {["All Battery", "< 20%", "20 - 50%", "> 50%"].map((batt) => {
+                const key = batt === "All Battery" ? "All" :batt;
+                return (
+                  <button
+                  key={batt}
+                      onClick={() => {
+                        setSelectedBattery(key);
+                        setCurrentPage(1);
+                      }}
+                      className={`px-3 py-1.5 rounded-lg font-medium transition ${
+                        selectedBattery === key
+                          ? "bg-blue-600 text-white font-semibold"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                  >
+                    {batt}
+
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Zone Dropdown */}
+            <div className="relative">
+              <select
+                value={selectedZone}
+                onChange={(e) => {
+                  setSelectedZone(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="bg-[#182032] border border-slate-800 text-slate-300 text-xs font-medium px-3 py-2 pr-8 rounded-xl appearance-none focus:outline-none cursor-pointer"
+              >
+                <option value="All">📍 All Zones</option>
+                  <option value="North">North Zone</option>
+                  <option value="Central">Central Zone</option>
+                  <option value="South">South Zone</option>
+                  <option value="East">East Zone</option>
+                  <option value="West">West Zone</option>
+                </select> 
+              <ChevronDown className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-3 pointer-events-none" />
+            </div>
+            </div>
+          </section>
+
+          {/* 6. Main Data Table */}
+          <section className="bg-[#121827] border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+              <div className="p-4 border-b border-slate-800/80 flex items-center gap-3 text-xs">
+                  <span className="font-bold text-white">{filteredVans.length} vans</span>
+                  <span className="bg-red-950 text-red-400 border border-red-800 px-2 py-0.5 rounded-md font-bold">
+                    🔴 {brokenDownCount} broken
+                  </span>
+                  <span className="bg-amber-950 text-amber-400 border border-amber-800 px-2 py-0.5 rounded-md font-bold">
+                    ⚡ {lowBatteryCount} low battery
+                  </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                {/* Header of the  Vans table */}
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-[#0E1322] text-slate-400 font-bold uppercase tracking-wider border-b border-slate-800">
+                    <th className="p-4">Van ID</th>
+                    <th className="p-4">Driver</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4">Battery</th>
+                    <th className="p-4">Zone</th>
+                    <th className="p-4">Last Checked</th>
+                    </tr>
+                  </thead>
+
+                  {/* Content of the Vans table */}
+                  <tbody className="divide-y divide-slate-800/60 font-medium">
+                    {paginatedVans.map((van) => (
+                      <tr key={van.id} className="hover:bg-slate-800/30 transition" >
+                        <td className="p-4 font-extrabold text-white">{van.id}</td>
+                        <td className="p-4 text-slate-300">{van.driver}</td>
+                        <td className="p-4">
+
+                          {van.status === "Broken Down" && (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-red-950/80 text-red-400 border border-red-900/60">
+                            🔴 ✖ Broken Down
+                            </span>
+                          )}
+
+                          {van.status === "Needs Service" && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-950/80 text-amber-400 border border-amber-900/60">
+                            ⚠️ Needs Service
+                          </span>
+                        )}
+
+                          {van.status === "Operational" && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-900/60">
+                            🟢 Operational
+                          </span>
+                        )}
+                        </td>
+
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`font-bold ${
+                              van.battery < 20
+                                ? "text-red-400"
+                                : van.battery <= 50
+                                ? "text-amber-400"
+                                : "text-emerald-400"
+                            }`}
+                            >
+                              {van.battery}
+                            </span>
+                            <div className="w-20 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                              <div
+                                className={`h-1.5 rounded-full ${
+                                  van.battery < 20
+                                    ? "bg-red-500"
+                                    : van.battery <= 50
+                                    ? "bg-amber-500"
+                                    : "bg-emerald-500"
+                                }`}
+                                style={{ width: `${van.battery}%` }}
+                              />
+                              </div>
+
+                              {/* Critical Badge */}
+                              {van.battery < 10 && (
+                                <span className="bg-red-900 text-red-200 border border-red-700 text-[9px] font-extrabold px-1.5 py-0.5 rounded">
+                                  ⚡ CRITICAL
+                                </span>
+                              )}
+                              {van.battery >= 10 && van.battery < 20 && (
+                                <span className="bg-amber-900 text-amber-200 border border-amber-700 text-[9px] font-extrabold px-1.5 py-0.5 rounded">
+                                  ⚡ LOW
+                                </span>
+                              )}
+
+                            </div>
+                        </td>
+
+                        <td className="p-4 text-slate-300">{van.zone}</td>
+                        <td className="p-4 text-slate-500 flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-slate-600" />
+                        {van.lastChecked.split(" ")[1] || van.lastChecked}
+                      </td>
+                      </tr>
+                    ))}
+
+                  </tbody>
+                </table>
+              </div>
+
+
+
+
+          </section>
         </main>
-
       </div>
-
     </div>
     
-  )
-
-
-
-
-
-
-
-
-
-
+  );
 }
