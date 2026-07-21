@@ -96,7 +96,7 @@ export default function FleetDashboard() {
           </nav>
         </div>
         <div className="flex flex-col gap-3">
-          <button className="p-3 rounded-xl text-slate-500 hover:text-slate-300 hove:bg-slate-800/50 transition">
+          <button className="p-3 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition">
             <Settings className="w-5 h-5" />
           </button>
           <button className="p-3 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition">
@@ -257,7 +257,7 @@ export default function FleetDashboard() {
                 <div className="relative w-36 h-36 flex items-center justify-center">
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                     <path
-                      className="text-s;ate-800"
+                      className="text-slate-800"
                       strokeWidth="4"
                       stroke="currentColor"
                       fill="none"
@@ -337,7 +337,7 @@ export default function FleetDashboard() {
           <section className="bg-[#121827] border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-4 shadow-lg">
             {/* Search Bar */}
             <div className="relative flex-1 min-w-[240px]">
-              {/* <Search className="absolution left-3 top-3 w-4 h-4 text-slate-500" /> */}
+              <Search className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
               <input 
                 type="text" 
                 placeholder="Search van ID or driver..."
@@ -354,7 +354,7 @@ export default function FleetDashboard() {
             <div className="flex flex-wrap items-center gap-2 text-xs">
               {/* Status filter group  [ Operational , Broke Down , .....]*/}
               <div className="bg-[#182032] p-1 rounded-xl flex items-center gap-1 border border-slate-800">
-                {["All", "Operational", "Needs Service", "Broke Down"].map((status) =>(
+                {["All", "Operational", "Needs Service", "Broken Down"].map((status) =>(
                   <button
                   key ={status}
                   onClick={() => {
@@ -527,9 +527,45 @@ export default function FleetDashboard() {
                 </table>
               </div>
 
+              {/* Pagination Controls */}
+              <div className="bg-[#0E1322] px-6 py-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                <p>
+                  Showing <span className="font-bold text-white">{(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredVans.length)} </span> of{" "}
+                  <span className="font-bold text-white">{filteredVans.length}</span> vans
+                </p>
 
+                <div className="flex items-center gap-1" >
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    disabled= {currentPage === 1}
+                    className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 font-semibold"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" /> Previous
+                  </button>
 
+                  {Array.from({ length: totalPages}, (_, i) => i + 1).map((page) =>(
+                    <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-7 h-7 rounded-lg font-bold transition ${
+                      currentPage === page
+                        ? "bg-blue-600 text-white"
+                        : "bg-slate-800/60 text-slate-400 hover:bg-slate-700"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                  ))}
 
+                  <button
+                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 font-semibold"
+                  >
+                  Next <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+                </div>
+              </div>
           </section>
         </main>
       </div>
